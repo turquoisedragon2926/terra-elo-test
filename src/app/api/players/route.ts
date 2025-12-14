@@ -8,8 +8,9 @@ import { playerQuerySchema, createPlayerSchema } from '@/lib/validations/schemas
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const timeCategory = searchParams.get('timeCategory');
     const params = playerQuerySchema.parse({
-      timeCategory: searchParams.get('timeCategory'),
+      timeCategory: timeCategory || undefined,
     });
 
     // Fetch all players with their ratings
