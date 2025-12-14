@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/layout/header';
 import { LeaderboardTable } from '@/components/leaderboard/leaderboard-table';
 import { TimeCategoryTabs } from '@/components/leaderboard/time-category-tabs';
+import { AddPlayerDialog } from '@/components/players/add-player-dialog';
 import type { PlayerWithStats } from '@/types';
 
 export default function HomePage() {
@@ -11,22 +12,22 @@ export default function HomePage() {
   const [players, setPlayers] = useState<PlayerWithStats[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchLeaderboard() {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/players?timeCategory=${timeCategory}`);
-        const data = await response.json();
-        setPlayers(data);
-      } catch (error) {
-        console.error('Error fetching leaderboard:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchLeaderboard = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/players?timeCategory=${timeCategory}`);
+      const data = await response.json();
+      setPlayers(data);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    } finally {
+      setLoading(false);
     }
-
-    fetchLeaderboard();
   }, [timeCategory]);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,8 +42,9 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <TimeCategoryTabs value={timeCategory} onValueChange={setTimeCategory} />
+          <AddPlayerDialog onPlayerAdded={fetchLeaderboard} />
         </div>
 
         {loading ? (
