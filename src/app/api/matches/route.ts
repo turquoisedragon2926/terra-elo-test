@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/client';
 import { matches, playerRatings, eloHistory, players } from '@/lib/db/schema';
-import { and, eq, or, desc } from 'drizzle-orm';
+import { and, eq, or, desc, sql } from 'drizzle-orm';
 import { createMatchSchema, matchesQuerySchema } from '@/lib/validations/schemas';
 import { processMatchResult } from '@/lib/elo/calculator';
+import { alias } from 'drizzle-orm/pg-core';
+
+// Create aliases for joining players table twice
+const whitePlayer = alias(players, 'white_player');
+const blackPlayer = alias(players, 'black_player');
 
 // GET /api/matches - Fetch matches with optional filters
 export async function GET(request: NextRequest) {
@@ -35,16 +40,16 @@ export async function GET(request: NextRequest) {
       ? and(...whereConditions)
       : undefined;
 
-    // Fetch matches with player details
+    // Fetch matches with player details using aliases
     const matchList = await db
       .select({
         match: matches,
-        whitePlayer: players,
-        blackPlayer: players,
+        whitePlayer: whitePlayer,
+        blackPlayer: blackPlayer,
       })
       .from(matches)
-      .leftJoin(players, eq(matches.whitePlayerId, players.id))
-      .leftJoin(players, eq(matches.blackPlayerId, players.id))
+      .leftJoin(whitePlayer, eq(matches.whitePlayerId, whitePlayer.id))
+      .leftJoin(blackPlayer, eq(matches.blackPlayerId, blackPlayer.id))
       .where(whereClause)
       .orderBy(desc(matches.playedAt))
       .limit(params.limit)
