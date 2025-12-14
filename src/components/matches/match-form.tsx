@@ -33,9 +33,16 @@ export function MatchForm() {
       try {
         const response = await fetch('/api/players');
         const data = await response.json();
-        setPlayers(data);
+        // Ensure data is an array
+        if (Array.isArray(data)) {
+          setPlayers(data);
+        } else {
+          console.error('API returned non-array data:', data);
+          setPlayers([]);
+        }
       } catch (error) {
         console.error('Error fetching players:', error);
+        setPlayers([]);
       }
     }
 

@@ -19,9 +19,16 @@ export default function MatchesPage() {
       try {
         const response = await fetch('/api/matches?limit=50');
         const data = await response.json();
-        setMatches(data);
+        // Ensure data is an array
+        if (Array.isArray(data)) {
+          setMatches(data);
+        } else {
+          console.error('API returned non-array data:', data);
+          setMatches([]);
+        }
       } catch (error) {
         console.error('Error fetching matches:', error);
+        setMatches([]);
       } finally {
         setLoading(false);
       }
