@@ -15,10 +15,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const params = matchesQuerySchema.parse({
-      timeCategory: searchParams.get('timeCategory'),
-      playerId: searchParams.get('playerId'),
-      limit: searchParams.get('limit'),
-      offset: searchParams.get('offset'),
+      timeCategory: searchParams.get('timeCategory') || undefined,
+      playerId: searchParams.get('playerId') || undefined,
+      limit: searchParams.get('limit') || undefined,
+      offset: searchParams.get('offset') || undefined,
     });
 
     let whereConditions = [];
